@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title>Job management page</title>
+ 
+  <link href="static/css/style.css" type="text/css"  rel="stylesheet">
+ 
+
+</head>
+
+<body>
+
+  <main id="main" class="main">
+
+    <section class="section">
+      
+              <h5 class="title" style="text-align: center;font-size: 25px;font-weight: bold;">List of jobs</h5>
+               <table style="border: 1px solid black;" >
+               	<thead>
+               	 <tr style="border: 1px solid black;">
+               	 	<th style="border: 1px solid black;">JobExecutionId</thstyle="border: 1px solid black;">
+               	 	<th style="border: 1px solid black;">CreateTime</th>
+               	 	<th style="border: 1px solid black;">StartTime</th>
+               	 	<th style="border: 1px solid black;">EndTime</th>
+               	 	<th style="border: 1px solid black;">Status</th>
+               	 	<th style="border: 1px solid black;">ExitCode</th>
+               	 	<th style="border: 1px solid black;">ExitMessage</th>
+               	 </tr>
+               	</thead>
+               	<tbody>
+               	 <tr style="border: 1px solid black;" th:each="job:${jobs}">
+               	  <td style="border: 1px solid black;" th:text="${job.JobExecutionId}"/>
+               	  <td style="border: 1px solid black;" th:text="${job.CreateTime}"/>
+               	  <td style="border: 1px solid black;" th:text="${job.StartTime}"/>
+               	  <td  style="border: 1px solid black;"th:text="${job.EndTime}"/>
+               	  <td style="border: 1px solid black;" th:text="${job.Status}"/>
+               	  <td style="border: 1px solid black;" th:text="${job.ExitCode}"/>
+               	  <td style="border: 1px solid black;" th:text="${job.ExitMessage}"/>
+               	 </tr>
+               	</tbody>
+               
+               </table>
+            </div>
+          </div>
+
+        </div>
+       
+    </section>
+  </main><!-- End #main -->
+
+
+
+
+</body>
+
+
+</html>

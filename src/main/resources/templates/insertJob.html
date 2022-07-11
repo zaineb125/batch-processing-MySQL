@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" mlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title>Job management page</title>
+ 
+  <link href="static/css/style.css" type="text/css"  rel="stylesheet">
+ 
+
+</head>
+<body>
+
+ <form action="#" th:action="@{/load/addCustomer}" object="${customer}"  method="post">
+  <div class="form-group">
+    <label for="CustomerID">CustomerID</label>
+    <input type="text" class="form-control" id="CustomerID"  placeholder="Enter CustomerID" name="CustomerID" field="CustomerID">
+  </div>
+  <div class="form-group">
+    <label for="Genre">Genre</label>
+    <input type="text" class="form-control" id="Genre"  placeholder="Enter Genre" name="Genre" field="Genre">
+  </div>
+  <div class="form-group">
+    <label for="Age">Age</label>
+    <input type="text" class="form-control" id="Age"  placeholder="Enter Age" name="Age" field="Age">
+  </div>
+  <div class="form-group">
+    <label for="Annual_Income">Annual_Income</label>
+    <input type="text" class="form-control" id="Annual_Income"  placeholder="Enter Annual_Income" name="Annual_Income" field="Annual_Income">
+  </div>
+  <div class="form-group">
+    <label for="Spending_Score">Spending_Score</label>
+    <input type="text" class="form-control" id="Spending_Score"  placeholder="Enter Spending_Score" name="spending_Score" field="spending_Score">
+  </div>
+  </div>
+  <div class="form-group">
+  <button type="submit" class="form-control">Add a customer</button>
+  </div>
+   </div>
+</form>
+</body>
+
+
+</html>

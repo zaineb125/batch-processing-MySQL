@@ -1,75 +1,64 @@
 package com.batchprocessing.model;
 
-import java.util.Date;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Table;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
+@Table(name="customer")
 public class Customer {
 	
 	@Id
-	private Integer id;
-	private String name;
-	private Integer salary ;
-	private String dept ;
-	private Date time;
 	
-	@Override
-	public String toString() {
-		return "User [id=" + id + ", name=" + name + ", salary=" + salary + ", dept=" + dept + ", time=" + time + "]";
-	}
+	
+	public String CustomerID ;
+	
+	public String Genre ;
+	
+	public String Age ;
+	
+	public String Annual_Income ;
 
-	public Customer() {
-		
+	public String Spending_Score ;
+	
+	
+	public String getCustomerID() {
+		return CustomerID;
 	}
-
-	public Customer(Integer id, String name, String dept, Integer salary,Date time) {
-		super();
-		this.id = id;
-		this.name = name;
-		this.dept = dept;
-		this.salary = salary;
-		this.time=time;
+	public void setCustomerID(String customerID) {
+		CustomerID = customerID;
 	}
-
-	public Integer getId() {
-		return id;
+	public String getGenre() {
+		return Genre;
 	}
-
-	public void setId(Integer id) {
-		this.id = id;
+	public void setGenre(String genre) {
+		Genre = genre;
 	}
-
-	public String getName() {
-		return name;
+	public String getAge() {
+		return Age;
 	}
-
-	public void setName(String name) {
-		this.name = name;
+	public void setAge(String age) {
+		Age = age;
 	}
-
-	public String getDept() {
-		return dept;
+	public String getAnnual_Income() {
+		return Annual_Income;
 	}
-
-	public void setDept(String dept) {
-		this.dept = dept;
+	public void setAnnual_Income(String annual_Income) {
+		Annual_Income = annual_Income;
 	}
-
-	public Integer getSalary() {
-		return salary;
+	public String getSpending_Score() {
+		return Spending_Score;
 	}
-
-	public void setSalary(Integer salary) {
-		this.salary = salary;
+	public void setSpending_Score(String spending_Score) {
+		Spending_Score = spending_Score;
 	}
-	public Date getTime() {
-		return time;
-	}
-
-	public void setTime(Date time) {
-		this.time = time;
-	}
+	
+	
 }
