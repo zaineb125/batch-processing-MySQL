@@ -12,7 +12,10 @@ import org.springframework.batch.core.configuration.annotation.EnableBatchProces
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.item.ItemStreamReader;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider;
+import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.database.JdbcCursorItemReader;
 import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor;
@@ -26,13 +29,15 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
-
-
+import com.batchprocessing.mapper.CustomerRowMapper;
 import com.batchprocessing.model.Customer;
+import com.batchprocessing.model.NewJobExecution;
 import com.batchprocessing.processor.CustomerItemProcessor;
 import com.batchprocessing.repository.CustomerRepository;
+import com.batchprocessing.repository.NewJobExecutionRepository;
 
 import lombok.AllArgsConstructor;
 
@@ -56,10 +61,14 @@ public class BatchConfiguration {
 	@Autowired
 	public CustomerRepository customerRepository ;
 	
+	@Autowired
+	public NewJobExecutionRepository newJobExecutionRepository ;
+	
+	
 
 	//Cursor for Reading data from dataBase 
 	
-	@Bean
+	/*@Bean
 	public JdbcCursorItemReader<Customer> reader(){
 		
 		JdbcCursorItemReader<Customer> reader = new JdbcCursorItemReader<Customer>();
@@ -68,7 +77,7 @@ public class BatchConfiguration {
 		reader.setRowMapper(new CustomerRowMapper());
 		
 		return reader ;
-	}
+	}*/
 
 	//Processor to process data 
 	
@@ -96,28 +105,47 @@ public class BatchConfiguration {
 		return writer ; 
 	}
 	*/
+	
 	@Bean
-	public Step step1() throws Exception {
+	public ItemStreamReader<Customer> reader() {
+		JdbcCursorItemReader<Customer> reader = new JdbcCursorItemReader<Customer>();
+		reader.setDataSource(dataSource);
+		reader.setSql("SELECT CustomerID,Genre,Age,Annual_Income,Spending_Score FROM customer");
+		reader.setRowMapper(new CustomerRowMapper());
+		return reader;
+	}
+	
+	@Bean
+	public ItemWriter<Customer> writer() {
+		JdbcBatchItemWriter<Customer> writer = new JdbcBatchItemWriter<Customer>();
+		writer.setItemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<Customer>());
+		writer.setSql("INSERT INTO new_batch_job_execution (inserted_customerid,genre,age,annual_income,spending_score) VALUES (:CustomerID,:Genre,:Age,:Annual_Income,:Spending_Score)");
+		writer.setDataSource(dataSource);
+		return writer;
+	}
+	
+	@Bean
+	public Step step1(Customer customer) throws Exception {
 		return stepBuilderFactory.get("step1")
 								  .<Customer,Customer> chunk(10)
 								  .reader(reader())
 								  .processor(processor())
-								  .writer(new DBWriter(customerRepository))
+								  .writer(writer())
 								  .build();
 								  
 	}
 	
 	@Bean
-	public Job exportCustomerJob() throws Exception {
+	public Job exportCustomerJob(Customer customer) throws Exception {
 		
 		return jobBuilderFactory.get("exportCustomerJob")
 								.incrementer(new RunIdIncrementer())
-								.start(step1())
+								.start(step1(customer))
 								.build();
 	}
 	
 	
-	public class CustomerRowMapper implements RowMapper<Customer>{
+	/*public class CustomerRowMapper implements RowMapper<Customer>{
 
 		@Override
 		public Customer mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -131,34 +159,47 @@ public class BatchConfiguration {
 			return customer ;
 		}
 		
-	}
+	}*/
 	
-	public class DBWriter implements ItemWriter<Customer> {
+	/*public class DBWriter implements ItemWriter<Customer> {
 		
-		private CustomerRepository customerRepository;
+		private NewJobExecutionRepository newJobExecutionRepository;
+		
+		
 		
 		@Autowired
-		public DBWriter(CustomerRepository customerRepository) {
-			this.customerRepository = customerRepository;
-		}
+		public DBWriter(NewJobExecutionRepository newJobExecutionRepository) {
+			this.newJobExecutionRepository = newJobExecutionRepository;
+			
+		}*/
 		
 		
-		public void writeInDB()throws Exception{
+		/*public void writeInDB()throws Exception{
+			NewJobExecution newJobExecution =new NewJobExecution();
 			Customer customer = new Customer();
-			customer.setCustomerID("206");
-			customer.setGenre("Female");
+			customer.setCustomerID("209");
+			customer.setGenre("Male");
 			customer.setAge("22");
-			customer.setAnnual_Income("20000");
-			customer.setSpending_Score("35");
-			System.out.println("Insert a customer");
+			customer.setAnnual_Income("6000");
+			customer.setSpending_Score("200");
 			customerRepository.save(customer);
-		}
+			
+			System.out.println("Insert a customer");
+			
+			newJobExecution.setInsertedCustomerID(customer.getCustomerID());
+			newJobExecution.setGenre(customer.getGenre());
+			newJobExecution.setAge(customer.getAge());
+			newJobExecution.setAnnual_Income(customer.getAnnual_Income());
+			newJobExecution.setSpending_Score(customer.getSpending_Score());
+			newJobExecution.setInsertedCustomerID(customer.getCustomerID());
+			newJobExecutionRepository.save(newJobExecution);
+		}*/
 
 
-		@Override
+		/*@Override
 		public void write(List<? extends Customer> items) throws Exception {
 			writeInDB();
-		}
+		}*/
 		
 	}
-}
+

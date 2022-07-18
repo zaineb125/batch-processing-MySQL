@@ -15,6 +15,7 @@ import org.springframework.batch.core.repository.JobExecutionAlreadyRunningExcep
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.batchprocessing.config.BatchConfiguration;
 import com.batchprocessing.model.Customer;
 import com.batchprocessing.model.JobExecutions;
 import com.batchprocessing.repository.CustomerRepository;
@@ -45,8 +47,11 @@ public class LoadController {
 	JobExecutionRepository jobExecutionRepository ;
 	
 	
+	
+	
 	public BatchStatus load() throws JobParametersInvalidException,JobRestartException , JobExecutionAlreadyRunningException,JobInstanceAlreadyCompleteException{
 	
+		
 		Map<String,JobParameter>maps = new HashMap<>();
 		maps.put("time",new JobParameter(System.currentTimeMillis()));
 		
@@ -76,14 +81,15 @@ public class LoadController {
 		return "jobs";
 	}
 	
-	@PostMapping("/addCustomer")
-	public String addCustomer(@ModelAttribute("customer") Customer customer) {
-		return "success";
+	/*@PostMapping("/addCustomer")
+	public String addCustomer(@ModelAttribute("customer") Customer customer) throws JobParametersInvalidException, JobRestartException, JobExecutionAlreadyRunningException, JobInstanceAlreadyCompleteException {
+		
+		return "insertJob";
 	}
 	
 	@GetMapping("/formCustomer")
 	public String formCustomer() {
 		return "insertjob";
-	}
+	}*/
 	
 }
