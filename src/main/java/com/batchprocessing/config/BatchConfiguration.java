@@ -53,7 +53,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class BatchConfiguration {
 
-	private Resource outputResource = new FileSystemResource("output/customers.csv");
+	/*private Resource outputResource = new FileSystemResource("output/customers.csv");
 	
 	@Autowired
 	public JobBuilderFactory jobBuilderFactory;
@@ -257,5 +257,5 @@ public class BatchConfiguration {
 			writeInDB();
 		}
 		
-	}
+	}*/
 }
