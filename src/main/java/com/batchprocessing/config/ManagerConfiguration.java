@@ -1,5 +1,8 @@
 package com.batchprocessing.config;
 
+import java.util.Arrays;
+
+import javax.jms.JMSException;
 import javax.sql.DataSource;
 
 import org.apache.activemq.spring.ActiveMQConnectionFactory;
@@ -13,11 +16,14 @@ import org.springframework.batch.integration.config.annotation.EnableBatchIntegr
 import org.springframework.batch.item.ItemStreamReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.database.JdbcCursorItemReader;
+import org.springframework.batch.item.support.ListItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.channel.QueueChannel;
+import org.springframework.integration.config.EnableIntegration;
 import org.springframework.integration.core.MessagingTemplate;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.IntegrationFlows;
@@ -30,114 +36,65 @@ import lombok.AllArgsConstructor;
 
 @Configuration
 @EnableBatchIntegration
+@EnableIntegration
 @EnableBatchProcessing
-@AllArgsConstructor
+
 public class ManagerConfiguration {
 	
-		@Autowired
-    	public DataSource dataSource;
-    	
-    	@Autowired
-	    private RemoteChunkingManagerStepBuilderFactory managerStepBuilderFactory;
-    	
-    	@Autowired
-    	public JobBuilderFactory jobBuilderFactory;
-	        
-    	
-    	@Bean
-    	public org.apache.activemq.ActiveMQConnectionFactory connectionFactory() {
-    	    ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory();
-    	    factory.setBrokerURL("tcp://localhost:61616");
-    	    return factory;
-    	}
-    	
-        /*
-         * Declare the DirectChannel for requests
-         */
-        @Bean
-        public DirectChannel requests() {
-            return new DirectChannel();
-        }
-        
-        /*
-         * Declare the QueueChannel for replies
-         */
-        @Bean
-        public QueueChannel replies() {
-            return new QueueChannel();
-        }
-        
-        
-        /*
-         * Declare theoutboundFlow for requests
-         */
-        @Bean
-        public IntegrationFlow outboundFlow(ActiveMQConnectionFactory connectionFactory) {
-            return IntegrationFlows
-                    .from(requests())
-                    .handle(Jms.outboundAdapter(connectionFactory).destination("requests"))
-                    .get();
-        }
-        
-        /*
-         * Declare inboundFlow for replies
-         */
-        @Bean
-        public IntegrationFlow inboundFlow(ActiveMQConnectionFactory connectionFactory) {
-            return IntegrationFlows
-                    .from(Jms.messageDrivenChannelAdapter(connectionFactory).destination("replies"))
-                    .channel(replies())
-                    .get();
-        }
+		
+			@Autowired
+			private JobBuilderFactory jobBuilderFactory;
 
-        /*
-         * Declare the itemReader
-         */
-        @Bean
-    	public ItemStreamReader<Customer> itemReader() {
-    		JdbcCursorItemReader<Customer> reader = new JdbcCursorItemReader<Customer>();
-    		reader.setDataSource(dataSource);
-    		reader.setSql("SELECT CustomerID,Genre,Age,Annual_Income,Spending_Score FROM customer");
-    		reader.setRowMapper(new CustomerRowMapper());
-    		return reader;
-    	}
-        /*
-         * Configure the ChunkMessageChannelItemWriter
-         */
-        @Bean
-        public ItemWriter<Customer> itemWriter() {
-            MessagingTemplate messagingTemplate = new MessagingTemplate();
-            messagingTemplate.setDefaultChannel(requests());
-            messagingTemplate.setReceiveTimeout(2000);
-            ChunkMessageChannelItemWriter<Customer> chunkMessageChannelItemWriter
-                    = new ChunkMessageChannelItemWriter<>();
-            chunkMessageChannelItemWriter.setMessagingOperations(messagingTemplate);
-            chunkMessageChannelItemWriter.setReplyChannel(replies());
-            return chunkMessageChannelItemWriter;
-        }
-        
-        /*
-         * Declare the managerStep
-         */
-        @Bean
-        public TaskletStep managerStep() {
-            return this.managerStepBuilderFactory.get("managerStep")
-                       .chunk(100)
-                       .reader(itemReader())
-                       .outputChannel(requests()) // requests sent to workers
-                       .inputChannel(replies())   // replies received from workers
-                       .build();
-        }
-        
-        @Bean
-    	public Job exportCustomerJob(Customer customer) throws Exception {
-    	
-    		return jobBuilderFactory.get("exportCustomerJob")
-    								.start(managerStep())
-    								.build();
-    						       
-    	}
-        
+			@Autowired
+			private RemoteChunkingManagerStepBuilderFactory managerStepBuilderFactory;
+
+			@Bean
+			public ActiveMQConnectionFactory connectionFactory() throws JMSException {
+				ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory();
+				connectionFactory.setBrokerURL("tcp://localhost:61616");
+				return connectionFactory;
+			}
+
+			
+			@Bean
+			public DirectChannel requests() {
+				return new DirectChannel();
+			}
+
+			@Bean
+			public IntegrationFlow outboundFlow(ActiveMQConnectionFactory connectionFactory) {
+				return IntegrationFlows.from(requests()).handle(Jms.outboundAdapter(connectionFactory).destination("requests"))
+						.get();
+			}
+
+			
+			@Bean
+			public QueueChannel replies() {
+				return new QueueChannel();
+			}
+
+			@Bean
+			public IntegrationFlow inboundFlow(ActiveMQConnectionFactory connectionFactory) {
+				return IntegrationFlows.from(Jms.messageDrivenChannelAdapter(connectionFactory).destination("replies"))
+						.channel(replies()).get();
+			}
+
+			
+			@Bean
+			public ListItemReader<Integer> itemReader() {
+				return new ListItemReader<>(Arrays.asList(1, 2, 3, 4, 5, 6,7,8,9));
+			}
+
+			@Bean
+			public TaskletStep managerStep() {
+				return this.managerStepBuilderFactory.get("managerStep").<Integer, Integer>chunk(3).reader(itemReader())
+						.outputChannel(requests()).inputChannel(replies()).build();
+			}
+
+			@Bean
+			public Job remoteChunkingJob() {
+				return this.jobBuilderFactory.get("remoteChunkingJob").start(managerStep()).build();
+			}
         
 
 }
