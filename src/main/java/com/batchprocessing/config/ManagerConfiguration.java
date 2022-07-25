@@ -93,6 +93,7 @@ public class ManagerConfiguration {
 
 			@Bean
 			public Job remoteChunkingJob() {
+				System.out.println("Hi I'm the job to be executed");
 				return this.jobBuilderFactory.get("remoteChunkingJob").start(managerStep()).build();
 			}
         

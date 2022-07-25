@@ -40,13 +40,14 @@ import lombok.AllArgsConstructor;
 @EnableBatchIntegration
 @EnableIntegration
 @EnableBatchProcessing
-
 public class WorkerConfiguration {
 	
 
 	@Autowired
 	private RemoteChunkingWorkerBuilder<Integer, Integer> remoteChunkingWorkerBuilder;
+	
 
+	
 	@Bean
 	public ActiveMQConnectionFactory connectionFactory() throws JMSException {
 		ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory();
@@ -61,19 +62,19 @@ public class WorkerConfiguration {
 	}
 
 	@Bean
-	public IntegrationFlow inboundFlow1(ActiveMQConnectionFactory connectionFactory) {
+	public IntegrationFlow inboundFlow(ActiveMQConnectionFactory connectionFactory) {
 		return IntegrationFlows.from(Jms.messageDrivenChannelAdapter(connectionFactory).destination("requests"))
 				.channel(requests()).get();
 	}
 
 	
 	@Bean
-	public DirectChannel replies() {
-		return new DirectChannel();
+	public QueueChannel replies() {
+		return new QueueChannel();
 	}
 
 	@Bean
-	public IntegrationFlow outboundFlow1(ActiveMQConnectionFactory connectionFactory) {
+	public IntegrationFlow outboundFlow(ActiveMQConnectionFactory connectionFactory) {
 		return IntegrationFlows.from(replies()).handle(Jms.outboundAdapter(connectionFactory).destination("replies"))
 				.get();
 	}
