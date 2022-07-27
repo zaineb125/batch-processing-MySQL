@@ -41,7 +41,7 @@ import com.batchprocessing.repository.JobExecutionRepository;
 @RestController
 public class LoadController {
 	
-	/*@Autowired
+	@Autowired
 	JobLauncher jobLauncher ; 
 	
 	@Autowired
@@ -55,7 +55,7 @@ public class LoadController {
 	
 	
 
-	@GetMapping("/load")
+	
 	public BatchStatus load() throws JobParametersInvalidException,JobRestartException , JobExecutionAlreadyRunningException,JobInstanceAlreadyCompleteException{
 		System.out.println("enter the load ");
 		
@@ -78,17 +78,17 @@ public class LoadController {
 	}
 	
 	
-	
-	 /* public String getJobs(Model model) throws JobParametersInvalidException, JobRestartException, JobExecutionAlreadyRunningException, JobInstanceAlreadyCompleteException  {
-		System.out.println("coucou trying to get the jobs");
+	@GetMapping("/load")
+	 public String getJobs(Model model) throws JobParametersInvalidException, JobRestartException, JobExecutionAlreadyRunningException, JobInstanceAlreadyCompleteException  {
+		
 		load() ;
-		System.out.println("Load list of job Executions");
+		
 		List<JobExecutions> jobList = jobExecutionRepository.findAll();
 		
 		model.addAttribute("jobs",jobList);
 	
-		return "Jobs";
-	}*/
+		return "jobs";
+	}
 	
 	@GetMapping("/greeting")
 	public String hello() {
