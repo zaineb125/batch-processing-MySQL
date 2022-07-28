@@ -93,6 +93,7 @@ public class WorkerConfiguration {
 			for (Customer cust : customers) {
 				System.out.println("writing item " + cust.CustomerID);
 				NewCustomer customer = new NewCustomer();
+				customer.setId(cust.getCustomerID());
 				customer.setGenre(cust.getGenre());
 				customer.setAge(cust.getAge());
 				newCustomerRepository.save(customer);

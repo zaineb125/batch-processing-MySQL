@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 public class NewCustomer {
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	public String Id ;
 
 	public String Genre ;
