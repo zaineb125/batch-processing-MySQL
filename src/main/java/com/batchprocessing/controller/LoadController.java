@@ -38,7 +38,7 @@ import com.batchprocessing.repository.JobExecutionRepository;
 
 
 
-@RestController
+@Controller
 public class LoadController {
 	
 	@Autowired
@@ -92,7 +92,7 @@ public class LoadController {
 	
 	@GetMapping("/greeting")
 	public String hello() {
-		return  "Hello World";
+		return "success";
 	}
 	
 
