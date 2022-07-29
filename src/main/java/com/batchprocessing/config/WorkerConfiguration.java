@@ -1,51 +1,38 @@
 package com.batchprocessing.config;
 
-import java.util.List;
 
 import javax.jms.JMSException;
-
-
 import org.apache.activemq.spring.ActiveMQConnectionFactory;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
-import org.springframework.batch.core.step.item.ChunkProcessor;
-import org.springframework.batch.core.step.item.SimpleChunkProcessor;
-import org.springframework.batch.integration.chunk.ChunkProcessorChunkHandler;
 import org.springframework.batch.integration.chunk.RemoteChunkingWorkerBuilder;
 import org.springframework.batch.integration.config.annotation.EnableBatchIntegration;
 import org.springframework.batch.item.ItemProcessor;
 
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.file.FlatFileItemWriter;
-import org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor;
-import org.springframework.batch.item.file.transform.DelimitedLineAggregator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
-import org.springframework.integration.annotation.ServiceActivator;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Profile;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.channel.QueueChannel;
 import org.springframework.integration.config.EnableIntegration;
-
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.jms.dsl.Jms;
-import org.springframework.jms.annotation.EnableJms;
-
 import com.batchprocessing.model.Customer;
 import com.batchprocessing.model.NewCustomer;
-import com.batchprocessing.repository.CustomerRepository;
 import com.batchprocessing.repository.NewCustomerRepository;
-import com.batchprocessing.repository.NewJobExecutionRepository;
+
 
 @Configuration
 @EnableBatchIntegration
 @EnableIntegration
 @EnableBatchProcessing
-@EnableJms
+@Import(ChannelConfiguration.class)
+@Profile(value="slave")
 public class WorkerConfiguration {
 	
 
@@ -64,6 +51,8 @@ public class WorkerConfiguration {
 	@Autowired
 	private NewCustomerRepository newCustomerRepository ;
 
+	Logger logger = LoggerFactory.getLogger(WorkerConfiguration.class);
+	
 	
 	@Bean
 	public IntegrationFlow inboundFlow(ActiveMQConnectionFactory connectionFactory) throws JMSException {
@@ -82,7 +71,7 @@ public class WorkerConfiguration {
 	@Bean
 	public ItemProcessor<Customer, Customer> itemProcessor() {
 		return customer -> {
-			System.out.println("processing item " + customer.CustomerID);
+			logger.trace("processing item " + customer.CustomerID);
 			return customer;
 		};
 	}
@@ -91,7 +80,7 @@ public class WorkerConfiguration {
 	public ItemWriter<Customer> itemWriter() {
 		return customers -> {
 			for (Customer cust : customers) {
-				System.out.println("writing item " + cust.CustomerID);
+				logger.trace("writing item " + cust.CustomerID);
 				NewCustomer customer = new NewCustomer();
 				customer.setId(cust.getCustomerID());
 				customer.setGenre(cust.getGenre());

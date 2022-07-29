@@ -1,42 +1,46 @@
 package com.batchprocessing.config;
 
-import java.util.Arrays;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.sql.DataSource;
-
 import org.apache.activemq.spring.ActiveMQConnectionFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.step.tasklet.TaskletStep;
-import org.springframework.batch.integration.chunk.ChunkMessageChannelItemWriter;
 import org.springframework.batch.integration.chunk.RemoteChunkingManagerStepBuilderFactory;
 import org.springframework.batch.integration.config.annotation.EnableBatchIntegration;
-import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.data.RepositoryItemReader;
 import org.springframework.batch.item.database.JdbcCursorItemReader;
-import org.springframework.batch.item.support.ListItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Profile;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.channel.QueueChannel;
 import org.springframework.integration.config.EnableIntegration;
-import org.springframework.integration.core.MessagingTemplate;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.jms.dsl.Jms;
-import org.springframework.jms.annotation.EnableJms;
-
 import com.batchprocessing.mapper.CustomerRowMapper;
 import com.batchprocessing.model.Customer;
+import com.batchprocessing.repository.CustomerRepository;
+import com.batchprocessing.repository.NewCustomerRepository;
 
 @Configuration
 @EnableBatchIntegration
 @EnableIntegration
 @EnableBatchProcessing
 @Import(ChannelConfiguration.class)
+@Profile(value="master")
 public class ManagerConfiguration {
 	
 		
@@ -54,7 +58,7 @@ public class ManagerConfiguration {
 			
 			@Autowired
 			private QueueChannel managerReplies ;
-			
+		
 			
 			@Bean
 			public IntegrationFlow outboundFlow(ActiveMQConnectionFactory connectiontFactory) {
@@ -71,10 +75,6 @@ public class ManagerConfiguration {
 			}
 
 			
-			/*@Bean
-			public ListItemReader<Integer> itemReader() {
-				return new ListItemReader<>(Arrays.asList(1, 2, 3, 4, 5, 6,7,8,9));
-			}*/
 			
 			@Bean
 			public JdbcCursorItemReader<Customer> itemReader(){
@@ -86,6 +86,7 @@ public class ManagerConfiguration {
 				
 				return reader ;
 			}
+			 
 
 			@SuppressWarnings("unused")
 			@Bean
