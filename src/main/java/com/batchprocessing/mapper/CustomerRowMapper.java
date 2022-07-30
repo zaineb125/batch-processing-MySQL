@@ -2,6 +2,7 @@ package com.batchprocessing.mapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalTime;
 
 import org.springframework.jdbc.core.RowMapper;
 
@@ -18,6 +19,8 @@ public class CustomerRowMapper implements RowMapper<Customer> {
 		customer.setCustomerID(rs.getString("CustomerID"));
 		customer.setAnnual_Income(rs.getString("Annual_Income"));
 		customer.setSpending_Score(rs.getString("Spending_Score"));
+		customer.setUpdated(rs.getByte("updated"));
+		customer.setUpdateDate(LocalTime.now());
 		
 		return customer;
 	}

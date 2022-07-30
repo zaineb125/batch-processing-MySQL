@@ -1,23 +1,35 @@
 package com.batchprocessing.model;
 
-import javax.persistence.Column;
+
+import java.sql.Time;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+
+
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
 import org.springframework.stereotype.Component;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name="customer")
 @Component
 public class Customer {
 	
+	public byte getUpdated() {
+		return updated;
+	}
+	public void setUpdated(byte updated) {
+		this.updated = updated;
+	}
+	public LocalTime getUpdateDate() {
+		return update_Date;
+	}
+	public void setUpdateDate(LocalTime updateDate) {
+		this.update_Date = updateDate;
+	}
 	@Id
 	public String CustomerID ;
 	
@@ -29,7 +41,11 @@ public class Customer {
 
 	public String Spending_Score ;
 	
+	public byte updated ;
 	
+	public LocalTime update_Date ;
+	
+		
 	public String getCustomerID() {
 		return CustomerID;
 	}

@@ -1,6 +1,10 @@
 package com.batchprocessing.config;
 
 
+import java.sql.Time;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+
 import javax.jms.JMSException;
 import org.apache.activemq.spring.ActiveMQConnectionFactory;
 import org.slf4j.Logger;
@@ -24,7 +28,7 @@ import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.jms.dsl.Jms;
 import com.batchprocessing.model.Customer;
 import com.batchprocessing.model.NewCustomer;
-import com.batchprocessing.repository.NewCustomerRepository;
+import com.batchprocessing.repository.CustomerRepository;
 
 
 @Configuration
@@ -47,9 +51,11 @@ public class WorkerConfiguration {
 	
 	@Autowired
 	private DirectChannel workerReplies ;
-		
+	
 	@Autowired
-	private NewCustomerRepository newCustomerRepository ;
+	private CustomerRepository customerRepository ;
+		
+
 
 	Logger logger = LoggerFactory.getLogger(WorkerConfiguration.class);
 	
@@ -79,13 +85,11 @@ public class WorkerConfiguration {
 	@Bean
 	public ItemWriter<Customer> itemWriter() {
 		return customers -> {
-			for (Customer cust : customers) {
-				logger.trace("writing item " + cust.CustomerID);
-				NewCustomer customer = new NewCustomer();
-				customer.setId(cust.getCustomerID());
-				customer.setGenre(cust.getGenre());
-				customer.setAge(cust.getAge());
-				newCustomerRepository.save(customer);
+			for (Customer customer : customers) {
+				logger.trace("writing item " + customer.CustomerID);
+				customer.setUpdated((byte) 1);
+				customer.setUpdateDate(LocalTime.now());
+				customerRepository.save(customer);
 				
 			}
 		};

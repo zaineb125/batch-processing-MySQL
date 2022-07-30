@@ -81,7 +81,7 @@ public class ManagerConfiguration {
 				
 				JdbcCursorItemReader<Customer> reader = new JdbcCursorItemReader<Customer>();
 				reader.setDataSource(dataSource);
-				reader.setSql("SELECT CustomerID,Genre,Age,Annual_Income,Spending_Score FROM customer");
+				reader.setSql("SELECT CustomerID,Genre,Age,Annual_Income,Spending_Score,updated,update_Date FROM customer");
 				reader.setRowMapper(new CustomerRowMapper());
 				
 				return reader ;
