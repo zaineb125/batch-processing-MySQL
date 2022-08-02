@@ -98,7 +98,7 @@ public class WorkerConfiguration {
 	@Bean
 	public IntegrationFlow workerIntegrationFlow() throws Exception {
 		return this.remoteChunkingWorkerBuilder.itemProcessor(itemProcessor()).itemWriter(itemWriter())
-				.inputChannel(managerRequests).outputChannel(managerReplies).build();
+				.inputChannel(managerRequests).outputChannel(workerReplies).build();
 	}
 	
 
