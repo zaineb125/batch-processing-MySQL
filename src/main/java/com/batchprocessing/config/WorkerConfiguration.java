@@ -69,7 +69,7 @@ public class WorkerConfiguration {
 	
 	@Bean
 	public IntegrationFlow outboundFlow(ActiveMQConnectionFactory connectionFactory) throws JMSException {
-		return IntegrationFlows.from(workerReplies).handle(Jms.outboundAdapter(connectionFactory).destination("managerReplies"))
+		return IntegrationFlows.from(workerReplies).handle(Jms.outboundAdapter(connectionFactory).destination("workerReplies"))
 				.get();
 	}
 

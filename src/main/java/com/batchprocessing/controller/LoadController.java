@@ -15,6 +15,8 @@ import org.springframework.batch.core.repository.JobExecutionAlreadyRunningExcep
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,7 +28,7 @@ import com.batchprocessing.repository.JobExecutionRepository;
 @Controller
 public class LoadController {
 	
-	@Autowired
+	/*@Autowired
 	JobLauncher jobLauncher ; 
 	
 	@Autowired
@@ -74,11 +76,7 @@ public class LoadController {
 	
 		return "jobs";
 	}
-	
-	@GetMapping("/greeting")
-	public String hello() {
-		return "success";
-	}
+	*/
 	
 
 	

@@ -1,8 +1,7 @@
 package com.batchprocessing.model;
 
 
-import java.sql.Time;
-import java.time.LocalDateTime;
+import java.io.Serializable;
 import java.time.LocalTime;
 
 
@@ -16,8 +15,17 @@ import org.springframework.stereotype.Component;
 @Entity
 @Table(name="customer")
 @Component
-public class Customer {
+public class Customer implements Serializable {
 	
+	//private static final long serialVersionUID = 1L;
+
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6843003181192210758l;
+
+
 	public byte getUpdated() {
 		return updated;
 	}
@@ -25,10 +33,10 @@ public class Customer {
 		this.updated = updated;
 	}
 	public LocalTime getUpdateDate() {
-		return update_Date;
+		return update_date;
 	}
 	public void setUpdateDate(LocalTime updateDate) {
-		this.update_Date = updateDate;
+		this.update_date = updateDate;
 	}
 	@Id
 	public String CustomerID ;
@@ -43,7 +51,7 @@ public class Customer {
 	
 	public byte updated ;
 	
-	public LocalTime update_Date ;
+	public LocalTime update_date ;
 	
 		
 	public String getCustomerID() {
