@@ -102,7 +102,7 @@ public class ManagerConfiguration {
 
 			
 			
-			@Bean
+			/*@Bean
 			public JdbcCursorItemReader<Customer> itemReader(){
 				
 				JdbcCursorItemReader<Customer> reader = new JdbcCursorItemReader<Customer>();
@@ -111,13 +111,18 @@ public class ManagerConfiguration {
 				reader.setRowMapper(new CustomerRowMapper());
 				
 				return reader ;
-			}
+			}*/
 			 
 
 			@SuppressWarnings("unused")
 			@Bean
 			public TaskletStep managerStep() {
-				return this.managerStepBuilderFactory.get("managerStep").<Customer, Customer>chunk(103).reader(itemReader())
+				JdbcCursorItemReader<Customer> reader = new JdbcCursorItemReader<Customer>();
+				reader.setDataSource(dataSource);
+				reader.setSql("SELECT CustomerID,Genre,Age,Annual_Income,Spending_Score,updated,update_date FROM customer");
+				reader.setRowMapper(new CustomerRowMapper());
+				
+				return this.managerStepBuilderFactory.get("managerStep").<Customer, Customer>chunk(103).reader(reader)
 						.outputChannel(managerRequests).inputChannel(managerReplies).build();
 			}
 
