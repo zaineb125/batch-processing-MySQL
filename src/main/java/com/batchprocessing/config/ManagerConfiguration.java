@@ -1,38 +1,28 @@
 package com.batchprocessing.config;
 
-
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.batch.operations.JobRestartException;
 import javax.sql.DataSource;
 import org.apache.activemq.spring.ActiveMQConnectionFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
-import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
-import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.step.tasklet.TaskletStep;
 import org.springframework.batch.integration.chunk.RemoteChunkingManagerStepBuilderFactory;
 import org.springframework.batch.integration.config.annotation.EnableBatchIntegration;
-import org.springframework.batch.item.data.RepositoryItemReader;
-import org.springframework.batch.item.database.JdbcCursorItemReader;
+import org.springframework.batch.item.support.ListItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.channel.QueueChannel;
 import org.springframework.integration.config.EnableIntegration;
@@ -43,13 +33,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import com.batchprocessing.controller.LoadController;
-import com.batchprocessing.mapper.CustomerRowMapper;
 import com.batchprocessing.model.Customer;
 import com.batchprocessing.model.JobExecutions;
 import com.batchprocessing.repository.CustomerRepository;
 import com.batchprocessing.repository.JobExecutionRepository;
-import com.batchprocessing.repository.NewCustomerRepository;
 
 @Configuration
 @EnableBatchIntegration
@@ -82,8 +69,9 @@ public class ManagerConfiguration {
 			
 			@Autowired
 			JobExecutionRepository jobExecutionRepository ;
+			
 			@Autowired
-			private DirectChannel workerReplies ;
+			CustomerRepository customerRepository ;
 		
 			
 			@Bean
@@ -96,13 +84,15 @@ public class ManagerConfiguration {
 			
 			@Bean
 			public IntegrationFlow inboundFlow(ActiveMQConnectionFactory connectionFactory) {
-				return IntegrationFlows.from(Jms.messageDrivenChannelAdapter(connectionFactory).destination("workerReplies"))
-						.channel(workerReplies).get();
+				return IntegrationFlows.from(Jms.messageDrivenChannelAdapter(connectionFactory).destination("managerReplies"))
+						.channel(managerReplies).get();
 			}
 
 			
 			
-			/*@Bean
+			@Bean
+			@StepScope()
+			/*
 			public JdbcCursorItemReader<Customer> itemReader(){
 				
 				JdbcCursorItemReader<Customer> reader = new JdbcCursorItemReader<Customer>();
@@ -111,18 +101,21 @@ public class ManagerConfiguration {
 				reader.setRowMapper(new CustomerRowMapper());
 				
 				return reader ;
-			}*/
+			}
+			*/
+			
+			public ListItemReader<Customer> itemReader() {
+				List<Customer> response = (List<Customer>) customerRepository.findAll();
+				return new ListItemReader<>(response) ;
+				
+		    }
 			 
 
 			@SuppressWarnings("unused")
 			@Bean
-			public TaskletStep managerStep() {
-				JdbcCursorItemReader<Customer> reader = new JdbcCursorItemReader<Customer>();
-				reader.setDataSource(dataSource);
-				reader.setSql("SELECT CustomerID,Genre,Age,Annual_Income,Spending_Score,updated,update_date FROM customer");
-				reader.setRowMapper(new CustomerRowMapper());
+			public TaskletStep managerStep() throws Exception {
 				
-				return this.managerStepBuilderFactory.get("managerStep").<Customer, Customer>chunk(103).reader(reader)
+				return this.managerStepBuilderFactory.get("managerStep").<Customer, Customer>chunk(103).reader(itemReader())
 						.outputChannel(managerRequests).inputChannel(managerReplies).build();
 			}
 
@@ -133,7 +126,7 @@ public class ManagerConfiguration {
 			}*/
 			
 		
-			public BatchStatus remoteChunkingJob() throws JobExecutionAlreadyRunningException, org.springframework.batch.core.repository.JobRestartException, JobInstanceAlreadyCompleteException, JobParametersInvalidException {
+			public BatchStatus remoteChunkingJob() throws Exception {
 				Map<String,JobParameter>maps = new HashMap<>();
 				maps.put("time",new JobParameter(System.currentTimeMillis()));
 				
@@ -151,7 +144,7 @@ public class ManagerConfiguration {
 				
 			}
 			@GetMapping("/load")
-			 public String getJobs(Model model) throws JobParametersInvalidException, JobRestartException, JobExecutionAlreadyRunningException, JobInstanceAlreadyCompleteException, org.springframework.batch.core.repository.JobRestartException  {
+			 public String getJobs(Model model) throws Exception  {
 				
 				remoteChunkingJob() ;
 				

@@ -1,8 +1,6 @@
 package com.batchprocessing.config;
 
 
-import java.sql.Time;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import javax.jms.JMSException;
@@ -21,13 +19,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 import org.springframework.integration.channel.DirectChannel;
-import org.springframework.integration.channel.QueueChannel;
 import org.springframework.integration.config.EnableIntegration;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.jms.dsl.Jms;
 import com.batchprocessing.model.Customer;
-import com.batchprocessing.model.NewCustomer;
 import com.batchprocessing.repository.CustomerRepository;
 
 
@@ -45,9 +41,6 @@ public class WorkerConfiguration {
 	
 	@Autowired
 	private DirectChannel managerRequests ;
-	
-	@Autowired
-	private QueueChannel managerReplies ;
 	
 	@Autowired
 	private DirectChannel workerReplies ;
@@ -69,7 +62,7 @@ public class WorkerConfiguration {
 	
 	@Bean
 	public IntegrationFlow outboundFlow(ActiveMQConnectionFactory connectionFactory) throws JMSException {
-		return IntegrationFlows.from(workerReplies).handle(Jms.outboundAdapter(connectionFactory).destination("workerReplies"))
+		return IntegrationFlows.from(workerReplies).handle(Jms.outboundAdapter(connectionFactory).destination("managerReplies"))
 				.get();
 	}
 

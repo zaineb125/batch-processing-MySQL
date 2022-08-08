@@ -1,5 +1,12 @@
-{"properties": [{
-  "name": "profiles.active",
-  "type": "java.lang.String",
-  "description": "A description for 'profiles.active'"
-}]}
+{"properties": [
+  {
+    "name": "profiles.active",
+    "type": "java.lang.String",
+    "description": "A description for 'profiles.active'"
+  },
+  {
+    "name": "-Dspring.profiles.active",
+    "type": "java.lang.String",
+    "description": "A description for '-Dspring.profiles.active'"
+  }
+]}
