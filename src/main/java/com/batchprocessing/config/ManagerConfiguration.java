@@ -1,9 +1,11 @@
 package com.batchprocessing.config;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 import org.apache.activemq.spring.ActiveMQConnectionFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -17,8 +19,13 @@ import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.step.tasklet.TaskletStep;
 import org.springframework.batch.integration.chunk.RemoteChunkingManagerStepBuilderFactory;
 import org.springframework.batch.integration.config.annotation.EnableBatchIntegration;
+import org.springframework.batch.item.ItemReader;
+import org.springframework.batch.item.database.JpaCursorItemReader;
+import org.springframework.batch.item.database.JpaPagingItemReader;
+import org.springframework.batch.item.database.orm.JpaNativeQueryProvider;
 import org.springframework.batch.item.support.ListItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -29,6 +36,7 @@ import org.springframework.integration.config.EnableIntegration;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.jms.dsl.Jms;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -72,6 +80,11 @@ public class ManagerConfiguration {
 			
 			@Autowired
 			CustomerRepository customerRepository ;
+			
+			@Autowired
+			EntityManagerFactory entityManagerFactory ;
+			
+			
 		
 			
 			@Bean
@@ -104,10 +117,37 @@ public class ManagerConfiguration {
 			}
 			*/
 			
-			public ListItemReader<Customer> itemReader() {
+			/*public ListItemReader<Customer> itemReader() {
 				List<Customer> response = (List<Customer>) customerRepository.findAll();
 				return new ListItemReader<>(response) ;
 				
+		    }*/
+			
+			
+			/*@Qualifier("jpaPagingItemReader")
+			public ItemReader<Customer> itemReader() {
+			    JpaPagingItemReader<Customer> reader = new JpaPagingItemReader<Customer>();
+			    String sqlQuery = "SELECT CustomerID,Genre,Age,Annual_Income,Spending_Score,updated,update_date FROM customer";
+			    JpaNativeQueryProvider<Customer> queryProvider = new JpaNativeQueryProvider<Customer>();
+			    queryProvider.setSqlQuery(sqlQuery);
+			    queryProvider.setEntityClass(Customer.class);
+			    reader.setEntityManagerFactory(entityManagerFactory);
+			
+			    reader.setQueryProvider(queryProvider);
+			    
+			    reader.setSaveState(true);
+			    return reader;
+			}*/
+			 public ItemReader<Customer> itemReader() throws Exception {
+		        LocalContainerEntityManagerFactoryBean factoryBean = new LocalContainerEntityManagerFactoryBean();
+		        factoryBean.setDataSource(dataSource);
+		        String jpqlQuery = "SELECT CustomerID,Genre,Age,Annual_Income,Spending_Score,updated,update_date FROM customer";
+		        JpaCursorItemReader<Customer> itemReader = new JpaCursorItemReader<>();
+		        itemReader.setQueryString(jpqlQuery);
+		        itemReader.setEntityManagerFactory(factoryBean.getObject());
+		        itemReader.afterPropertiesSet();
+		        itemReader.setSaveState(true);
+		        return itemReader;
 		    }
 			 
 
@@ -119,12 +159,7 @@ public class ManagerConfiguration {
 						.outputChannel(managerRequests).inputChannel(managerReplies).build();
 			}
 
-			/*@Bean
-			public Job remoteChunkingJob() {
-				
-				return this.jobBuilderFactory.get("remoteChunkingJob").start(managerStep()).build();
-			}*/
-			
+		
 		
 			public BatchStatus remoteChunkingJob() throws Exception {
 				Map<String,JobParameter>maps = new HashMap<>();
