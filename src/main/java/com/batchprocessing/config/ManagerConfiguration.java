@@ -16,6 +16,7 @@ import org.springframework.batch.core.configuration.annotation.EnableBatchProces
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.step.skip.NonSkippableReadException;
 import org.springframework.batch.core.step.tasklet.TaskletStep;
 import org.springframework.batch.integration.chunk.RemoteChunkingManagerStepBuilderFactory;
 import org.springframework.batch.integration.config.annotation.EnableBatchIntegration;
@@ -124,38 +125,26 @@ public class ManagerConfiguration {
 		    }*/
 			
 			
-			/*@Qualifier("jpaPagingItemReader")
-			public ItemReader<Customer> itemReader() {
+		
+			public JpaPagingItemReader<Customer> itemReader() throws Exception{
 			    JpaPagingItemReader<Customer> reader = new JpaPagingItemReader<Customer>();
 			    String sqlQuery = "SELECT CustomerID,Genre,Age,Annual_Income,Spending_Score,updated,update_date FROM customer";
 			    JpaNativeQueryProvider<Customer> queryProvider = new JpaNativeQueryProvider<Customer>();
 			    queryProvider.setSqlQuery(sqlQuery);
 			    queryProvider.setEntityClass(Customer.class);
 			    reader.setEntityManagerFactory(entityManagerFactory);
-			
 			    reader.setQueryProvider(queryProvider);
-			    
+			 
 			    reader.setSaveState(true);
 			    return reader;
-			}*/
-			 public ItemReader<Customer> itemReader() throws Exception {
-		        LocalContainerEntityManagerFactoryBean factoryBean = new LocalContainerEntityManagerFactoryBean();
-		        factoryBean.setDataSource(dataSource);
-		        String jpqlQuery = "SELECT CustomerID,Genre,Age,Annual_Income,Spending_Score,updated,update_date FROM customer";
-		        JpaCursorItemReader<Customer> itemReader = new JpaCursorItemReader<>();
-		        itemReader.setQueryString(jpqlQuery);
-		        itemReader.setEntityManagerFactory(factoryBean.getObject());
-		        itemReader.afterPropertiesSet();
-		        itemReader.setSaveState(true);
-		        return itemReader;
-		    }
+			    
+			}
 			 
-
 			@SuppressWarnings("unused")
 			@Bean
 			public TaskletStep managerStep() throws Exception {
 				
-				return this.managerStepBuilderFactory.get("managerStep").<Customer, Customer>chunk(103).reader(itemReader())
+				return this.managerStepBuilderFactory.get("managerStep").<Customer, Customer>chunk(103).skip(RuntimeException.class).reader(itemReader())
 						.outputChannel(managerRequests).inputChannel(managerReplies).build();
 			}
 
